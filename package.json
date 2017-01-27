@@ -1,0 +1,31 @@
+{
+  "name": "mydataspace",
+  "version": "1.0.0",
+  "description": "Client library for MyDataSpace service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mydataspace/mydataspace.git"
+  },
+  "keywords": [
+    "mydataspace",
+    "mds",
+    "client"
+  ],
+  "author": {
+    "name": "Denis Gukov",
+    "email": "denguk@gmail.com",
+    "url": "http://github.com/fiftin"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mydataspace/mydataspace/issues"
+  },
+  "homepage": "https://github.com/mydataspace/mydataspace#readme",
+  "dependencies": {
+    "socket.io-client": "^1.7.2"
+  }
+}
