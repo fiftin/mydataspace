@@ -1,4 +1,4 @@
-# Client library for MyDataSpace - GitHub for Data
+# Client NodeJS library for MyDataSpace - GitHub for Data
 
 ![MyDataSpace](https://cs7064.vk.me/c836520/v836520717/23506/okyFdL8xLOw.jpg)
 
