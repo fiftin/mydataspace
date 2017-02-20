@@ -1,6 +1,6 @@
 {
   "name": "mydataspace",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Client NodeJS library for MyDataSpace - GitHub for Data",
   "main": "mydataspace.js",
   "scripts": {
@@ -11,9 +11,12 @@
     "url": "git+https://github.com/mydataspace/mydataspace.git"
   },
   "keywords": [
-    "mydataspace",
-    "mds",
-    "client"
+    "baas",
+    "cloud-storage",
+    "cloud-database",
+    "firebase",
+    "open-data",
+    "open-source"
   ],
   "author": {
     "name": "Denis Gukov",
