@@ -674,10 +674,11 @@ function Myda(options) {
   if (typeof options === 'string') {
     options = { root: options };
   }
+  var apiURL = options.import === true ? 'https://import.mydataspace.net' : 'https://api.mydataspace.net';
   this.options = MDSCommon.extend({
     useLocalStorage: true,
-		apiURL: 'https://api.my-data.space',
-		websocketURL: 'https://api.my-data.space',
+		apiURL:  apiURL,
+		websocketURL: apiURL
   }, options);
   this.root = this.options.root;
   this.connected = false;
