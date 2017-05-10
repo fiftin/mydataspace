@@ -1,6 +1,6 @@
 {
   "name": "mydataspace",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Client NodeJS library for MyDataSpace - GitHub for Data",
   "main": "mydataspace.js",
   "scripts": {
