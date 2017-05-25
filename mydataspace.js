@@ -672,36 +672,37 @@ function EntitySimplifier() {
 }
 
 function EntityFieldsSimplifier() {}
-// function EntityChildrenSimplifier() {}
+//function EntityChildrenSimplifier() {}
 
 EntityFieldsSimplifier.prototype.format = function(data) {
   var res = {};
   if (data != null && data.fields != null) {
-    if (!Array.isArray(data.fields)) {
-      throw new Error('fields field must be array, ' + (typeof data.fields) + ' received.');
-    }
-    for (let i in data.fields) {
-      let field = data.fields[i];
-      res[field.name] = field.value;
+    if (Array.isArray(data.fields)) {
+      for (var i in data.fields) {
+        var field = data.fields[i];
+        res[field.name] = field.value;
+      }
+    } else {
+      MDSCommon.extend(res, data.fields);
     }
   }
   data.fields = res;
 };
-//
-// EntityChildrenSimplifier.prototype.format = function(data) {
-//   var res = {};
-//   if (data != null && data.children != null) {
-//     if (!Array.isArray(data.children)) {
-//       throw new Error('children field must be array');
-//     }
-//     for (let i in data.children) {
-//       let child = data.children[i];
-//       let childName = MDSCommon.getPathName(child.path)
-//       res[childName] = child;
-//     }
-//   }
-//   data.children = res;
-// };
+
+//EntityChildrenSimplifier.prototype.format = function(data) {
+//  var res = {};
+//  if (data != null && data.children != null) {
+//    if (!Array.isArray(data.children)) {
+//      throw new Error('children field must be array');
+//    }
+//    for (let i in data.children) {
+//      let child = data.children[i];
+//      let childName = MDSCommon.getPathName(child.path)
+//      res[childName] = child;
+//    }
+//  }
+//  data.children = res;
+//};
 
 EntitySimplifier.prototype.format = function(data) {
   var datas;
@@ -712,7 +713,7 @@ EntitySimplifier.prototype.format = function(data) {
   } else {
     datas = data.datas;
   }
-  for (let i in datas) {
+  for (var i in datas) {
     this.formatEntity(datas[i]);
   }
 };
@@ -722,12 +723,12 @@ EntitySimplifier.prototype.formatEntity = function(entity) {
     if (!Array.isArray(entity.children)) {
       throw new Error('children field must be array');
     }
-    for (let i in entity.children) {
+    for (var i in entity.children) {
       this.formatEntity(entity.children[i]);
     }
   }
   this.fieldsSimplifier.format(entity);
-  // this.childrenSimplifier.format(entity);
+  //this.childrenSimplifier.format(entity);
 };
 
 /**
@@ -831,19 +832,19 @@ Entities.prototype.on = function(eventName, callback) {
   this.parent.on('entities.' + eventName + '.res', callback);
 };
 
-Entities.prototype.onChange = function(eventName, callback) {
+Entities.prototype.onChange = function(callback) {
   this.parent.on('entities.change.res', callback);
 };
 
-Entities.prototype.onDelete = function(eventName, callback) {
+Entities.prototype.onDelete = function(callback) {
   this.parent.on('entities.delete.res', callback);
 };
 
-Entities.prototype.onRename = function(eventName, callback) {
+Entities.prototype.onRename = function(callback) {
   this.parent.on('entities.rename.res', callback);
 };
 
-Entities.prototype.onCreate = function(eventName, callback) {
+Entities.prototype.onCreate = function(callback) {
   this.parent.on('entities.create.res', callback);
 };
 
@@ -929,6 +930,13 @@ function Myda(optionsOrRoot) {
 
   if (this.options.simpleFormat !== false) {
     this.registerFormatter('entities.get.res', new EntitySimplifier());
+    this.registerFormatter('entities.change.res', new EntitySimplifier());
+    this.registerFormatter('entities.create.res', new EntitySimplifier());
+    this.registerFormatter('entities.getRoots.res', new EntitySimplifier());
+    this.registerFormatter('entities.getMyRoots.res', new EntitySimplifier());
+
+    this.registerFormatter('entities.change', new EntitySimplifier());
+    this.registerFormatter('entities.create', new EntitySimplifier());
   }
   this.entities = new Entities(this, options.root);
   this.on('connected', this.options.connected);
@@ -971,9 +979,9 @@ Myda.prototype.getAuthProvider = function(providerName) {
 };
 
 Myda.prototype.connect = function() {
-  var self;
+  var self = this;
   return new Promise(function(resolve, reject) {
-    self.socket = io(this.options.websocketURL, {
+    self.socket = io(self.options.websocketURL, {
       secure: true,
       'forceNew' : true,
       'force new connection' : true,
@@ -1103,40 +1111,6 @@ Myda.prototype.on = function(eventName, callback, ignoreRequestErrors) {
   this.socket.on(eventName, this.formatAndCallIgnoreRequestErrors.bind(this, eventName, callback, ignoreRequestErrors));
 };
 
-Myda.prototype.request = function(eventName, data, successCallback, failCallback) {
-  var options = {
-    success: successCallback || function() {},
-    fail: failCallback || function() {}
-  };
-  if (Array.isArray(data)) {
-    if (data.length > 0) {
-      data = { datas: data };
-    } else {
-      successCallback();
-      return;
-    }
-  }
-  var responseEventName = eventName + '.res';
-  // Store request information to array
-  this.lastRequestId++;
-  data.requestId = this.lastRequestId;
-  this.requests[data.requestId] = {
-    options: options,
-    eventName: responseEventName
-  };
-
-  // Init response handler
-  if (this.subscriptions.indexOf(responseEventName) === -1) {
-    this.subscriptions.push(responseEventName);
-    this.socket.on(responseEventName, function(data) {
-      this.handleResponse(data, 'success');
-    }.bind(this));
-  }
-
-  // Send request
-  this.emit(eventName, data);
-};
-
 /**
  * Content dependent function to make request to the server over instance of Myda class.
  * Content must be instance of Myda class!
@@ -1190,7 +1164,7 @@ Myda.prototype.request = function(eventName, data, successCallback, failCallback
   if (successCallback || failCallback) {
     request.call(this, eventName, data, successCallback, failCallback);
   } else {
-    return new Promise(req.bind(this, eventName, data));
+    return new Promise(request.bind(this, eventName, data));
   }
 };
 
