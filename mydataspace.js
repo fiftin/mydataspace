@@ -807,13 +807,37 @@ var MDSCommon = {
     return ret;
   },
 
-  convertMapToNameValue: function (obj) {
+  /**
+   * Converts object to array of objects in format:
+   * [{
+   *   name: object-field-name,
+   *   value: object-field-value,
+   *   type: object-field-type
+   * }, ...]
+   * @param obj
+   * @param [addType] Is field "type" required?
+   * @returns {Array}
+   */
+  convertMapToNameValue: function (obj, addType) {
     var ret = [];
+    var value;
     for (var i in obj) {
-      ret.push({
+      value = {
         name: i,
         value: obj[i]
-      });
+      };
+      if (addType) {
+        if (MDSCommon.isInt(value)) {
+          value.type = 'i';
+        } else if (MDSCommon.isReal(value)) {
+          value.type = 'r';
+        } else if (MDSCommon.isBool(value)) {
+          value.type = 'b';
+        } else {
+          value.type = 's';
+        }
+      }
+      ret.push(value);
     }
     return ret;
   },
@@ -1362,7 +1386,7 @@ function Entities(client, root) {
   this.root = root;
 }
 
-Entities.prototype.request = function (eventName, data) {
+Entities.prototype.prepareData = function (data) {
   var d;
   var self = this;
   if (self.root) {
@@ -1379,7 +1403,19 @@ Entities.prototype.request = function (eventName, data) {
   } else {
     d = data;
   }
-  return this.client.request(eventName, d);
+  return d;
+};
+
+Entities.prototype.emit = function (eventName, data) {
+  return this.client.emit(eventName, this.prepareData(data));
+};
+
+Entities.prototype.request = function (eventName, data) {
+  return this.client.request(eventName, this.prepareData(data));
+};
+
+Entities.prototype.emitCreate = function (data) {
+  return this.emit('entities.create', data);
 };
 
 Entities.prototype.create = function (data) {
@@ -1387,37 +1423,85 @@ Entities.prototype.create = function (data) {
 };
 
 Entities.prototype.get = function (data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
   return this.request('entities.get', data);
 };
 
+Entities.prototype.getMyChildren = function (data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
+  return this.request('entities.getMyChildren', data);
+};
+
 Entities.prototype.getWithMeta = function (data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
   return this.request('entities.getWithMeta', data);
 };
 
 Entities.prototype.getAll = function (data) {
   if (typeof data === 'string') {
-    data = {
-      path: data
-    };
+    data = { path: data };
   }
   data.children = true;
   return this.get(data);
 };
 
 Entities.prototype.delete = function (data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
   return this.request('entities.delete', data);
+};
+
+Entities.prototype.emitDelete = function (data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
+  return this.emit('entities.delete', data);
 };
 
 Entities.prototype.change = function(data) {
   return this.request('entities.change', data);
 };
 
+Entities.prototype.emitChange = function (data) {
+  return this.emit('entities.change', data);
+};
+
+/**
+ * Subscribe to events of entities.
+ * @param data
+ * @returns {Promise}
+ */
 Entities.prototype.subscribe = function(data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
   return this.request('entities.subscribe', data);
 };
 
 Entities.prototype.unsubscribe = function(data) {
+  if (typeof data === 'string') {
+    data = { path: data };
+  }
   return this.request('entities.unsubscribe', data);
+};
+
+Entities.prototype.onConnected = function (callback) {
+  this.client.on('connected', callback);
+};
+
+Entities.prototype.onLogout = function (callback) {
+  this.client.on('logout', callback);
+};
+
+Entities.prototype.onLogin = function (callback) {
+  this.client.on('login', callback);
 };
 
 Entities.prototype.on = function(eventName, callback) {
