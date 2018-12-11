@@ -15,7 +15,10 @@
     "cloud-storage",
     "cloud-database",
     "firebase",
-    "open-data"
+    "webdev",
+    "website-builder",
+    "wix",
+    "ecommerce"
   ],
   "author": {
     "name": "Denis Gukov",
