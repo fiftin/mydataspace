@@ -1,11 +1,5 @@
-# Client NodeJS library for MyDataSpace - GitHub for Data
+# Client NodeJS library for Web 2.0 Site - Website Builder for Developers
 
-![MyDataSpace](https://cs7064.vk.me/c836520/v836520717/23506/okyFdL8xLOw.jpg)
+![Web 2.0 Site](https://scontent-frx5-1.xx.fbcdn.net/v/t1.0-9/47509667_2045925908828899_2164107898739752960_o.jpg)
 
-Open Source continues to capture the world. With the ability to use the code freely,
-developers save time and effort, which allowed for the implementation of new ideas.
-
-The difference from the code, the data remains private. No one wants to share
-extracted with such difficulty.
-
-MyDataSpace helps to make the step to the open data by connecting people over the world.
+Focus on development, not administration and infrastructure.
