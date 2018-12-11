@@ -1,7 +1,7 @@
 {
   "name": "mydataspace",
   "version": "3.0.7",
-  "description": "Client library for MyDataSpace",
+  "description": "Client library for Web 2.0 Site",
   "main": "mydataspace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
