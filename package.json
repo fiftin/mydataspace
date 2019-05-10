@@ -1,7 +1,7 @@
 {
   "name": "mydataspace",
   "version": "4.0.0",
-  "description": "Client library for MyDataSpace",
+  "description": "Client library for Web 2.0 Site",
   "main": "mydataspace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,7 +15,10 @@
     "cloud-storage",
     "cloud-database",
     "firebase",
-    "open-data"
+    "webdev",
+    "website-builder",
+    "wix",
+    "ecommerce"
   ],
   "author": {
     "name": "Denis Gukov",
