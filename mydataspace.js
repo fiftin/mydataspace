@@ -481,6 +481,34 @@ var MDSCommon = {
     return 'less than a second'; //'just now' //or other string you like;
   },
 
+  /**
+   * @param {number|string} number
+   * @returns {string}
+   */
+  humanizeNumber: function (number) {
+    if (!MDSCommon.isNumber(number)) {
+      throw new Error('Must be number');
+    }
+
+    if (typeof number === 'string') {
+      number = parseInt(number);
+    }
+
+    if (number < 1000) {
+      return Math.round(number) + '';
+    }
+
+    if (number < 1000000) {
+      return Math.round(number / 1000) + 'K';
+    }
+
+    if (number < 1000000000) {
+      return Math.round(number / 1000000) + 'M';
+    }
+
+    return Math.round(number / 1000000000) + 'G';
+  },
+
   humanizeDate: function (date, language) {
     if (typeof date === 'string') {
       date = new Date(date);
@@ -491,7 +519,10 @@ var MDSCommon = {
     return MDSCommon.millisecondsToStr(deltaMillis);
   },
 
-  escapeHtml: function (string) {
+  escapeHtml: function (string, escapeSpaces) {
+    if (typeof escapeSpaces === 'undefined') {
+      escapeSpaces = true;
+    }
     var str = '' + string;
     var match = /["'&<> ]/.exec(str);
 
@@ -507,6 +538,9 @@ var MDSCommon = {
     for (index = match.index; index < str.length; index++) {
       switch (str.charCodeAt(index)) {
         case 32: // space
+          if(!escapeSpaces) {
+            continue;
+          }
           escape = '&nbsp;';
           break;
         case 34: // "
@@ -1340,20 +1374,18 @@ EntityFieldsUnsimplifier.prototype.format = function(data) {
       }
     } else {
       for (var key in data.fields) {
-        var type = 's';
         if (typeof data.fields[key] === 'number') {
-          if (MDSCommon.isInt(data.fields[key])) {
-            type = 'i';
-          } else {
-            type = 'r';
-          }
+          res.push({
+            name: key,
+            value: data.fields[key],
+            type: MDSCommon.isInt(data.fields[key]) ? 'i' : 'r'
+          });
+        } else {
+          res.push({
+            name: key,
+            value: data.fields[key]
+          });
         }
-
-        res.push({
-          name: key,
-          value: data.fields[key],
-          type: type
-        });
       }
     }
   }
@@ -1584,8 +1616,8 @@ Entities.prototype.isConnected = function () {
  *                                   If this option is true:
  *                                   - Subscribers will not receive messages
  *                                   - More requests per second can be send
- * @param {string} [options.clientId]
- * @param {string} [options.permission]
+ * @param {string} options.clientId
+ * @param {string} options.permission
  * @constructor
  */
 function MDSClient(options) {
@@ -1612,15 +1644,15 @@ function MDSClient(options) {
   this.authProviders = {
     accessToken: {
       url: '/auth?authProvider=access-token' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}%3BresultFormat=json'
+           '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}%3BresultFormat=json'
     },
     vk: {
       title: 'Connect through VK',
       icon: 'vk',
       url: 'https://oauth.vk.com/authorize?client_id={{oauth_client_id}}' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
-        '&redirect_uri={{api_url}}%2fauth%2fvk' +
-        '&display=popup',
+      '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
+      '&redirect_uri={{api_url}}%2fauth%2fvk' +
+      '&display=popup',
       loginWindow: {
         height: 400
       }
@@ -1629,9 +1661,9 @@ function MDSClient(options) {
       title: 'Authorize tasks through VK',
       icon: 'vk',
       url: 'https://oauth.vk.com/authorize?client_id=6249018' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}%3Bauth_token%3d{{auth_token}}' +
-        '&redirect_uri={{api_url}}%2fauth%2fvk%2Ftasks' +
-        '&display=popup',
+      '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}%3Bauth_token%3d{{auth_token}}' +
+      '&redirect_uri={{api_url}}%2fauth%2fvk%2Ftasks' +
+      '&display=popup',
       loginWindow: {
         height: 400
       }
@@ -1640,8 +1672,8 @@ function MDSClient(options) {
       title: 'Connect through GitHub',
       icon: 'github',
       url: 'https://github.com/login/oauth/authorize?client_id={{oauth_client_id}}&scope={{scope}}' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
-        '&redirect_uri={{api_url}}%2fauth%2fgithub',
+           '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
+           '&redirect_uri={{api_url}}%2fauth%2fgithub',
       loginWindow: {
         height: 600
       }
@@ -1650,9 +1682,9 @@ function MDSClient(options) {
       title: 'Connect through Facebook',
       icon: 'facebook',
       url: 'https://www.facebook.com/dialog/oauth?client_id={{oauth_client_id}}&scope={{scope}}' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
-        '&redirect_uri={{api_url}}%2fauth%2ffacebook' +
-        '&display=popup',
+           '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
+           '&redirect_uri={{api_url}}%2fauth%2ffacebook' +
+           '&display=popup',
       loginWindow: {
         height: 400
       }
@@ -1661,10 +1693,10 @@ function MDSClient(options) {
       title: 'Connect through Google',
       icon: 'google-plus',
       url: 'https://accounts.google.com/o/oauth2/auth' +
-        '?access_type=offline&scope={{scope}}&response_type=code' +
-        '&client_id={{oauth_client_id}}' +
-        '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
-        '&redirect_uri={{api_url}}%2fauth%2fgoogle',
+           '?access_type=offline&scope={{scope}}&response_type=code' +
+           '&client_id={{oauth_client_id}}' +
+           '&state=permission%3d{{permission}}%3BclientId%3d{{client_id}}' +
+           '&redirect_uri={{api_url}}%2fauth%2fgoogle',
       loginWindow: {
         height: 800
       }
@@ -1687,6 +1719,7 @@ function MDSClient(options) {
     this.registerFormatter('entities.create.res', new EntitySimplifier());
     this.registerFormatter('entities.getRoots.res', new EntitySimplifier());
     this.registerFormatter('entities.getMyRoots.res', new EntitySimplifier());
+    this.registerFormatter('entities.getMyChildren.res', new EntitySimplifier());
   }
 
   this.entities = new Entities(this);
@@ -1709,9 +1742,9 @@ function MDSClient(options) {
 }
 
 MDSClient.DEFAULT_URLS = {
-  cdnURL:  'https://cdn.mydataspace.net',
-  apiURL:  'https://api.mydataspace.net',
-  importURL: 'https://import.mydataspace.net'
+  cdnURL:  'https://cdn.web20site.com',
+  apiURL:  'https://api.web20site.com',
+  importURL: 'https://api.web20site.com'
 };
 
 MDSClient.OAUTH_CLIENT_IDS = {
@@ -1929,8 +1962,11 @@ MDSClient.prototype.login = function(providerName) {
   var authCheckInterval = setInterval(function() {
     authWindow.postMessage({ message: 'requestAuthResult' }, '*');
   }, 1000);
-  return new Promise(function(resolve, reject) {
-    self.on('login', function(args) { resolve(args); });
+
+  return self.connect().then(function () {
+    new Promise(function(resolve, reject) {
+      self.on('login', function(args) { resolve(args); });
+    })
   });
 };
 
