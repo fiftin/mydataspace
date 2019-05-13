@@ -2193,11 +2193,11 @@ MDSClient.prototype.handleResponse = function(data, callbackName) {
     return;
   }
 
-  var req = this.requests[data.requestId];
+  var req = this.requests[requestId];
   if (typeof req === 'undefined') {
     return;
   }
-  delete this.requests[data.requestId];
+  delete this.requests[requestId];
   if (typeof req.options !== 'undefined' && callbackName in req.options) {
     var callback = req.options[callbackName];
     this.formatAndCall(req.eventName, callback, data);
