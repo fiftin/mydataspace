@@ -1,7 +1,7 @@
 {
   "name": "mydataspace",
-  "version": "4.0.0",
-  "description": "Client library for Web 2.0 Site",
+  "version": "4.0.1",
+  "description": "Client library for Fastlix",
   "main": "mydataspace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
